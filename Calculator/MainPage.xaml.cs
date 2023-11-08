@@ -1,4 +1,4 @@
-﻿namespace Calculator;
+namespace Calculator;
 
 public partial class MainPage : ContentPage
 {
@@ -93,24 +93,39 @@ public partial class MainPage : ContentPage
     }
 
 
-    void OnCalculate(object sender, EventArgs e) //wypisywanie wyniku równania 
+    async void OnCalculate(object sender, EventArgs e)
     {
         if (currentState == 2)
         {
-            if(secondNumber == 0)
+            if (secondNumber == 0)
                 LockNumberValue(resultText.Text);
 
             double result = Calculator.Calculate(firstNumber, secondNumber, mathOperator);
-
             this.CurrentCalculation.Text = $"{firstNumber} {mathOperator} {secondNumber}";
 
+            // Sprawdzenie, czy sender jest typu Button i wykonanie animacji jeśli tak
+            if (sender is Button button)
+            {
+                await AnimateButton(button);
+            }
+
+            // Ustawienie formatu dziesiętnego przed wyświetleniem wyniku
+            decimalFormat = mathOperator switch
+            {
+                "√" => "N2", // Dla pierwiastka używamy dwóch miejsc po przecinku
+                "x²" => "N2", // Dla kwadratu również możemy chcieć mieć dwie cyfry po przecinku
+                _ => decimalFormat // Dla pozostałych operacji zachowujemy obecny format
+            };
             this.resultText.Text = result.ToTrimmedString(decimalFormat);
-            firstNumber = result;
+            firstNumber = result; // Przypisanie wyniku do firstNumber dla dalszych obliczeń
             secondNumber = 0;
-            currentState = -1;
+            currentState = 1; // Reset stanu do domyślnego
             currentEntry = string.Empty;
         }
-    }    
+    }
+
+
+
 
     async void OnNegative(object sender, EventArgs e)
     {
@@ -157,13 +172,16 @@ public partial class MainPage : ContentPage
     {
         Button button = (Button)sender;
         await AnimateButton(button);
-        if (currentState == 1)
+        if (currentState != 2) // Sprawdza, czy obecnie nie jesteśmy w trakcie operacji
         {
             LockNumberValue(resultText.Text);
-            mathOperator = "x²";
-            currentState = 2;
-            OnCalculate(this, null);
+            firstNumber = firstNumber * firstNumber; // Przypisujemy wynik kwadratu do firstNumber
+            this.resultText.Text = firstNumber.ToString(decimalFormat);
+            currentEntry = firstNumber.ToString(); // Ustawiamy currentEntry na nową wartość
+            currentState = 1; // Ustawiamy currentState na 1, aby można było kontynuować obliczenia
         }
     }
+
+
 
 }
