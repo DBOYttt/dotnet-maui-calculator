@@ -1,4 +1,4 @@
-﻿namespace Calculator;
+namespace Calculator;
 
 public static class Calculator
 {
@@ -21,10 +21,12 @@ public static class Calculator
                 result = value1 - value2;
                 break;
             case "√":
-                result = Math.Sqrt(value1);
+                double doubleValueroot = Convert.ToDouble(value1);
+                result = Math.Sqrt(doubleValueroot);
                 break;
             case "x²":
-                result = value1 * value1;
+                double doubleValue = Convert.ToDouble(value1);
+                result = Math.Pow(doubleValue, 2);
                 break;
         }
 
